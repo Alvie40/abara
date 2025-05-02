@@ -1,15 +1,14 @@
+'use client';
+
 import React from "react";
 import BookList from "@/app/components/BookList";
+import { useSession } from "next-auth/react";
 
-export const metadata = {
-    title: "Books list"
-}
+const Page: React.FC = () => {
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.is_admin || false;
 
-interface Props {
-}
-
-const Page: React.FC<Props> = () => {
-    return <BookList/>
+    return <BookList canEdit={isAdmin} />;
 };
 
 export default Page;

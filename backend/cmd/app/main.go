@@ -78,7 +78,7 @@ func main() {
 		{
 			protected.GET("/user-orders", orderHandler.GetOrdersForUser)
 			protected.POST("/orders", orderHandler.CreateOrder)
-			
+
 			// Admin-only book operations
 			protected.POST("/books", bookHandler.CreateBook)
 			protected.PATCH("/books/:id", bookHandler.UpdateBook)

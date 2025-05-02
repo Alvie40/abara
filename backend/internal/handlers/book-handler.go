@@ -3,13 +3,14 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"path/filepath"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/manjurulhoque/book-store/backend/internal/models"
 	"github.com/manjurulhoque/book-store/backend/internal/services"
-	"net/http"
-	"path/filepath"
-	"strconv"
 )
 
 type BookHandler struct {
@@ -69,7 +70,7 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 	extension := filepath.Ext(file.Filename)
 	newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension)
 	filePath := filepath.Join("uploads", newFileName)
-	
+
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 		return
@@ -140,7 +141,7 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 		extension := filepath.Ext(file.Filename)
 		newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension)
 		filePath := filepath.Join("uploads", newFileName)
-		
+
 		if err := c.SaveUploadedFile(file, filePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 			return
