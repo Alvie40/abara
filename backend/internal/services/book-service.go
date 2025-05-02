@@ -5,34 +5,43 @@ import (
 	"github.com/manjurulhoque/book-store/backend/internal/repositories"
 )
 
-type BookService struct {
+type BookService interface {
+	CreateBook(book *models.Book) error
+	GetBookById(id uint) (*models.Book, error)
+	GetAllBooks() ([]models.Book, error)
+	UpdateBook(book *models.Book) error
+	DeleteBook(id uint) error
+	GetHomeBooks() ([]models.Book, []models.Book, error)
+}
+
+type bookService struct {
 	bookRepo repositories.BookRepository
 }
 
-func NewBookService(repo repositories.BookRepository) *BookService {
-	return &BookService{bookRepo: repo}
+func NewBookService(repo repositories.BookRepository) BookService {
+	return &bookService{bookRepo: repo}
 }
 
-func (s *BookService) CreateBook(book *models.Book) error {
+func (s *bookService) CreateBook(book *models.Book) error {
 	return s.bookRepo.CreateBook(book)
 }
 
-func (s *BookService) GetBookById(id uint) (*models.Book, error) {
+func (s *bookService) GetBookById(id uint) (*models.Book, error) {
 	return s.bookRepo.GetBookById(id)
 }
 
-func (s *BookService) GetAllBooks() ([]models.Book, error) {
+func (s *bookService) GetAllBooks() ([]models.Book, error) {
 	return s.bookRepo.GetAllBooks()
 }
 
-func (s *BookService) UpdateBook(book *models.Book) error {
+func (s *bookService) UpdateBook(book *models.Book) error {
 	return s.bookRepo.UpdateBook(book)
 }
 
-func (s *BookService) DeleteBook(id uint) error {
+func (s *bookService) DeleteBook(id uint) error {
 	return s.bookRepo.DeleteBook(id)
 }
 
-func (s *BookService) GetHomeBooks() ([]models.Book, []models.Book, error) {
+func (s *bookService) GetHomeBooks() ([]models.Book, []models.Book, error) {
 	return s.bookRepo.GetHomeBooks()
 }

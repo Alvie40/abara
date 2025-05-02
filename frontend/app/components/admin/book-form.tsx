@@ -26,18 +26,17 @@ const BookForm = () => {
     } = useForm<BookFormData>();
 
     const onSubmit = async (data: BookFormData) => {
-        console.log(data);
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('description', data.description);
         formData.append('category', data.category);
-        formData.append('trending', data.trending);
-        formData.append('old_price', data.oldPrice);
-        formData.append('new_price', data.newPrice);
+        formData.append('trending', String(data.trending));
+        formData.append('old_price', String(data.oldPrice));
+        formData.append('new_price', String(data.newPrice));
         formData.append('cover_image', data.coverImage[0]);
 
         try {
-            await axios.post(`${process.env.BACKEND_BASE_URL}/api/books`, formData, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/books`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -138,7 +137,14 @@ const BookForm = () => {
                 {/* Image Preview */}
                 {imagePreview && (
                     <div className="mt-4">
-                        <Image src={imagePreview} alt="Selected Preview" className="h-auto rounded-md" width={100} height={100}/>
+                        <Image 
+                            src={imagePreview} 
+                            alt="Selected Preview" 
+                            className="rounded-md" 
+                            width={100} 
+                            height={100}
+                            style={{ height: 'auto' }}
+                        />
                     </div>
                 )}
             </div>

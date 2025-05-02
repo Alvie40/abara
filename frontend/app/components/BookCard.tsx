@@ -30,12 +30,12 @@ const BookCard: React.FC<BookCardProps> = ({book, canEdit}) => {
                 <div className="sm:flex-shrink-0 border rounded-md">
                     <Link href={`/books/${book.id}`}>
                         <Image
-                            src={`${getImgUrl()}`}
-                            alt="book"
-                            className="w-full bg-cover p-2 rounded-md cursor-pointer hover:scale-105 transition-all duration-200"
-                            height={300}
-                            width={200}
-                            priority={true}
+                            src={getImgUrl()}
+                            alt={book.title}
+                            width={300}
+                            height={400}
+                            className="object-contain"
+                            style={{ height: 'auto' }}
                         />
                     </Link>
                 </div>

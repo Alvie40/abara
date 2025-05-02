@@ -10,6 +10,9 @@ import { ToastContainer } from "react-toastify";
 import { NextAuthProvider } from "@/app/components/NextAuthProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/authOptions";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -22,7 +25,7 @@ export default async function RootLayout({children,}: Readonly<{ children: React
     return (
         <NextAuthProvider session={session}>
             <html lang="en">
-            <body>
+            <body className={inter.className}>
             <ReduxProvider>
                 <Navbar/>
                 <main className='min-h-screen max-w-screen-2xl mx-auto px-4 py-6 font-primary'>
@@ -31,8 +34,8 @@ export default async function RootLayout({children,}: Readonly<{ children: React
                         {children}
                     </Suspense>
                 </main>
+                <ToastContainer position="top-right" autoClose={3000} />
             </ReduxProvider>
-            <ToastContainer/>
             <Footer/>
             </body>
             </html>

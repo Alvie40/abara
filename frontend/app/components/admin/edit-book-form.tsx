@@ -18,12 +18,17 @@ interface BookFormData {
     new_price: number;
 }
 
+interface ApiResponse {
+    data: Book;
+    status: boolean;
+}
+
 const EditBookForm = () => {
     const params = useParams();
-    const {data, isLoading} = useGetBookQuery(params.id, {
+    const {data: response, isLoading} = useGetBookQuery(Number(params.id), {
         skip: !params.id,
     });
-    const book = data?.data as Book;
+    const book = response as Book;
 
     const router = useRouter();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -51,9 +56,9 @@ const EditBookForm = () => {
         formData.append('title', data.title);
         formData.append('description', data.description);
         formData.append('category', data.category);
-        formData.append('trending', data.trending);
-        formData.append('old_price', data.old_price);
-        formData.append('new_price', data.new_price);
+        formData.append('trending', String(data.trending));
+        formData.append('old_price', String(data.old_price));
+        formData.append('new_price', String(data.new_price));
         if (data.cover_image[0]) {
             // Append the new cover image if it's selected
             formData.append('cover_image', data.cover_image[0]);
@@ -63,7 +68,7 @@ const EditBookForm = () => {
         }
 
         try {
-            await axios.patch(`${process.env.BACKEND_BASE_URL}/api/books/${book.id}`, formData, {
+            await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/api/books/${book.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -164,7 +169,14 @@ const EditBookForm = () => {
                 {/* Image Preview */}
                 {imagePreview && (
                     <div className="mt-4">
-                        <Image src={imagePreview} alt="Selected Preview" className="h-auto rounded-md" width={100} height={100}/>
+                        <Image 
+                            src={imagePreview} 
+                            alt="Selected Preview" 
+                            className="rounded-md" 
+                            width={100} 
+                            height={100}
+                            style={{ height: 'auto' }}
+                        />
                     </div>
                 )}
             </div>

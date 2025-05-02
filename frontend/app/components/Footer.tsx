@@ -9,7 +9,14 @@ const Footer: React.FC<any> = () => {
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                 {/* Left Side - Logo and Nav */}
                 <div className="md:w-1/2 w-full">
-                    <Image src="/assets/footer-logo.png" alt="Logo" className="mb-5 w-36" width={100} height={100}/>
+                    <Image 
+                        src="/assets/footer-logo.png" 
+                        alt="Logo" 
+                        className="mb-5 w-36" 
+                        width={100} 
+                        height={100}
+                        style={{ height: 'auto' }}
+                    />
                     <ul className="flex flex-col md:flex-row gap-4">
                         <li><a href="#home" className="hover:text-primary">Home</a></li>
                         <li><a href="#services" className="hover:text-primary">Services</a></li>

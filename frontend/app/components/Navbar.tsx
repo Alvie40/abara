@@ -8,6 +8,7 @@ import { HiOutlineUser } from "react-icons/hi";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 const navs = [
     {name: "Orders", href: "/orders"},
@@ -18,7 +19,7 @@ const Navbar = () => {
     const {data: session, status} = useSession();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const currentUser = useMemo(() => session?.user, [session]);
-    const cartItems = useSelector(state => state.cart.cartItems);
+    const cartItems = useSelector((state: RootState) => state.cart.cartItems);
 
     const handleLogOut = async () => {
         await signOut();
@@ -52,9 +53,13 @@ const Navbar = () => {
                         {
                             currentUser && !currentUser?.is_admin ? <>
                                 <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-                                    <Image src="/assets/avatar.png" alt=""
-                                           width={40} height={40}
-                                           className={`size-7 rounded-full ${currentUser ? 'ring-2 ring-blue-500' : ''}`}
+                                    <Image 
+                                        src="/assets/avatar.png" 
+                                        alt="" 
+                                        width={40} 
+                                        height={40}
+                                        className={`size-7 rounded-full ${currentUser ? 'ring-2 ring-blue-500' : ''}`}
+                                        style={{ height: 'auto' }}
                                     />
                                 </button>
                                 {/* show dropdowns */}

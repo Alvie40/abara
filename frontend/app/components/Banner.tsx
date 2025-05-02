@@ -26,7 +26,13 @@ const Banner = () => {
                 animate="visible"
                 variants={imageVariants}
             >
-                <Image src="/assets/banner.png" alt="banner" width={500} height={400}/>
+                <Image 
+                    src="/assets/banner.png" 
+                    alt="banner" 
+                    width={500} 
+                    height={400}
+                    style={{ height: 'auto' }}
+                />
             </motion.div>
 
             {/* Animated Text div */}

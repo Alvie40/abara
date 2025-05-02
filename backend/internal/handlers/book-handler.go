@@ -7,17 +7,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/manjurulhoque/book-store/backend/internal/models"
 	"github.com/manjurulhoque/book-store/backend/internal/services"
-	"github.com/manjurulhoque/book-store/backend/pkg/db"
 	"net/http"
 	"path/filepath"
 	"strconv"
 )
 
 type BookHandler struct {
-	bookService *services.BookService
+	bookService services.BookService
 }
 
-func NewBookHandler(bookService *services.BookService) *BookHandler {
+func NewBookHandler(bookService services.BookService) *BookHandler {
 	return &BookHandler{bookService: bookService}
 }
 
@@ -45,6 +44,13 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 }
 
 func (h *BookHandler) CreateBook(c *gin.Context) {
+	// Check admin permission
+	isAdmin, exists := c.Get("isAdmin")
+	if !exists || !isAdmin.(bool) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required", "status": false})
+		return
+	}
+
 	var book models.Book
 	book.Title = c.PostForm("title")
 	book.Description = c.PostForm("description")
@@ -60,22 +66,18 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	// Generate a unique file name using uuid and keep the original extension
-	extension := filepath.Ext(file.Filename)                           // Get the file extension
-	newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension) // Generate UUID and append the file extension
-
-	// Define the path to save the file (e.g., "uploads/")
+	extension := filepath.Ext(file.Filename)
+	newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension)
 	filePath := filepath.Join("uploads", newFileName)
+	
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 		return
 	}
 
-	// Set the file path to the CoverImage field
 	book.CoverImage = filePath
 
-	// Save the book to the database (assuming h.DB.Create is your ORM method)
-	if err := db.DB.Create(&book).Error; err != nil {
+	if err := h.bookService.CreateBook(&book); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 		return
 	}
@@ -100,6 +102,13 @@ func (h *BookHandler) GetBookById(c *gin.Context) {
 }
 
 func (h *BookHandler) UpdateBook(c *gin.Context) {
+	// Check admin permission
+	isAdmin, exists := c.Get("isAdmin")
+	if !exists || !isAdmin.(bool) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required", "status": false})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
@@ -113,7 +122,6 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 		return
 	}
 
-	book.ID = uint(id)
 	book.Title = c.PostForm("title")
 	book.Description = c.PostForm("description")
 	book.Category = c.PostForm("category")
@@ -123,32 +131,25 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 
 	// Handle file upload
 	file, err := c.FormFile("cover_image")
-	if err != nil {
-		if errors.Is(err, http.ErrMissingFile) {
-			// If the file is not uploaded, keep the existing cover image
-			//book.CoverImage = c.PostForm("cover_image")
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Cover image is required", "status": false})
-			return
-		}
-	} else {
-		// Generate a unique file name using uuid and keep the original extension
-		extension := filepath.Ext(file.Filename)                           // Get the file extension
-		newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension) // Generate UUID and append the file extension
+	if err != nil && !errors.Is(err, http.ErrMissingFile) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid cover image", "status": false})
+		return
+	}
 
-		// Define the path to save the file (e.g., "uploads/")
+	if file != nil {
+		extension := filepath.Ext(file.Filename)
+		newFileName := fmt.Sprintf("%s%s", uuid.New().String(), extension)
 		filePath := filepath.Join("uploads", newFileName)
+		
 		if err := c.SaveUploadedFile(file, filePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 			return
 		}
 
-		// Set the file path to the CoverImage field
 		book.CoverImage = filePath
 	}
 
-	// Update the book in the database (assuming h.DB.Save is your ORM method)
-	if err := db.DB.Save(&book).Error; err != nil {
+	if err := h.bookService.UpdateBook(book); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "status": false})
 		return
 	}
