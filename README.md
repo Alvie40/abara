@@ -1,104 +1,121 @@
-# Book Store
+# Book Store with FastAPI, Next.js, and MCP
 
-This is a full-stack book store application built with Go for the backend and Next.js for the frontend.
+A modern book store application using FastAPI for the backend, Next.js for the frontend, and Model Context Protocol (MCP) with Ollama for AI-powered book descriptions.
 
 ## Features
 
-- User authentication and authorization
-- Admin dashboard for managing books and orders
-- Goroutine practice
-- JWT token generation with custom claims
-- CRUD operations for books and orders
-- Middleware for request validation and logging
-- Responsive UI with React and Next.js
-- State management with Redux Toolkit
-
-## Tech Stack
-
-### Backend
-
-- **Go**: Programming language for the backend
-- **Gin**: Web framework for building the API
-- **GORM**: ORM library for database interactions
-- **JWT**: JSON Web Tokens for authentication
-- **Slog**: Structured logging
-
-### Frontend
-
-- **Next.js**: React framework for server-side rendering and static site generation
-- **React**: JavaScript library for building user interfaces
-- **Redux Toolkit**: State management
-- **TypeScript**: Typed superset of JavaScript
-- **ESLint**: Linting tool for code quality
-
-## Screenshots
-
-### Home Page
-![Home Page](./screenshots/sc1.png)
-
-### Books Page
-![Books Page](./screenshots/sc2.png)
-
-### Cart Page
-![Cart](./screenshots/sc3.png)
-
-### Admin dashboard
-![Dashboard](./screenshots/sc4.png)
+- FastAPI backend with async SQLAlchemy and PostgreSQL
+- Next.js frontend with TypeScript and Tailwind CSS
+- MCP integration using Ollama and CodeLlama for AI-generated book descriptions
+- JWT-based authentication
+- Role-based access control (Admin/User)
+- Docker/Podman containerization
 
 ## Getting Started
 
-### Backend
+### Prerequisites
 
-1. Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
+- Docker or Podman
+- Node.js 18+ (for local development)
+- Python 3.12+ (for local development)
 
-2. Install dependencies:
-    ```bash
-    go mod tidy
-    ```
+### Quick Start
 
-3. Run the server:
-    ```bash
-    go run main.go
-    ```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/book-store.git
+   cd book-store
+   ```
 
-### Frontend
+2. Create environment files:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
 
-1. Navigate to the frontend directory:
-    ```bash
-    cd frontend
-    ```
+3. Start the services:
+   ```bash
+   docker-compose up -d
+   ```
 
-2. Install dependencies:
-    ```bash
-    npm install
-    ```
+The services will start in the following order:
+1. PostgreSQL database (port 5432)
+2. Database migrations
+3. MCP service with Ollama (port 11434)
+4. FastAPI backend (port 8080)
+5. Next.js frontend (port 3000)
 
-3. Run the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    # or
-    bun dev
-    ```
+### Default Admin Account
 
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+After starting the services, you can log in with the default admin account:
+- Email: admin@example.com
+- Password: admin123
 
-## Learn More
+### API Documentation
 
-To learn more about the technologies used in this project, take a look at the following resources:
+- OpenAPI documentation: http://localhost:8080/docs
+- ReDoc documentation: http://localhost:8080/redoc
 
-- [Go Documentation](https://golang.org/doc/)
-- [Gin Documentation](https://gin-gonic.com/docs/)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://reactjs.org/docs/getting-started.html)
-- [Redux Toolkit Documentation](https://redux-toolkit.js.org/introduction/getting-started)
+## Development
+
+### Backend Development
+
+```bash
+cd backend
+poetry install
+poetry shell
+uvicorn app.main:app --reload
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Environment Variables
+
+#### Backend (.env)
+- `SECRET_KEY`: JWT secret key
+- `DATABASE_URL`: PostgreSQL connection URL
+- `MCP_URL`: Ollama service URL
+- See `.env.example` for all options
+
+#### Frontend (.env)
+- `NEXT_PUBLIC_API_URL`: Backend API URL
+- `NEXTAUTH_URL`: NextAuth.js URL
+- `NEXTAUTH_SECRET`: NextAuth.js secret
+
+## Architecture
+
+### Backend (FastAPI)
+- Async SQLAlchemy with PostgreSQL
+- JWT authentication
+- Role-based access control
+- Alembic migrations
+- Pydantic data validation
+
+### Frontend (Next.js)
+- TypeScript
+- NextAuth.js for authentication
+- Tailwind CSS for styling
+- Redux for state management
+
+### MCP Service (Ollama)
+- CodeLlama 13B model for AI-powered descriptions
+- RESTful API integration
+- Automatic model loading
+
+## Container Dependencies
+
+Services start in the following order with proper health checks:
+1. `db` - PostgreSQL database
+2. `migrations` - Alembic database migrations
+3. `mcp` - Ollama MCP service
+4. `backend` - FastAPI application
+5. `frontend` - Next.js application
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.

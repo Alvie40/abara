@@ -11,12 +11,44 @@ services:
       POSTGRES_DB: bookstore
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
+
+  migrations:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: alembic upgrade head
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/bookstore
+      DB_USE_SSL: "false"
+      SECRET_KEY: your-super-secret-key-here
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    depends_on:
+      - migrations
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/generate"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   backend:
     build:
@@ -25,9 +57,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/bookstore?sslmode=disable
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/bookstore
+      DB_USE_SSL: "false"
+      SECRET_KEY: your-super-secret-key-here
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      MCP_URL: http://mcp:11434
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
     depends_on:
-      db:
+      mcp:
         condition: service_healthy
 
   frontend:
@@ -37,11 +76,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=your-super-secret-key-here
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: your-super-secret-key-here
     depends_on:
       - backend
 
 volumes:
   postgres_data:
+  ollama_data:

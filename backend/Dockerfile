@@ -1,22 +1,38 @@
-FROM golang:1.22-alpine
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache gcc musl-dev postgresql-client git
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy go mod files and download dependencies
-COPY go.mod go.sum ./
-RUN go mod download
+# Install Poetry
+RUN pip install poetry
 
-# Copy the rest of the application
+# Copy poetry files
+COPY pyproject.toml poetry.lock ./
+
+# Install dependencies
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi
+
+# Copy application code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=1 go build -o main ./cmd/app/main.go
+# Create uploads directory
+RUN mkdir -p uploads && chmod 777 uploads
 
-# Create and set up entrypoint script directly
-RUN printf '#!/bin/sh\nwhile ! pg_isready -h db -U postgres; do\n    echo "Waiting for postgres..."\n    sleep 2\ndone\npsql -h db -U postgres -d bookstore -f /app/migrations/20240501000000_init.sql\n./main\n' > /app/entrypoint.sh && \
+# Create and set up entrypoint script
+RUN echo '#!/bin/sh\n\
+while ! pg_isready -h db -U postgres; do\n\
+    echo "Waiting for postgres..."\n\
+    sleep 2\n\
+done\n\
+alembic upgrade head\n\
+uvicorn app.main:app --host 0.0.0.0 --port 8080\n' > /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 
 EXPOSE 8080
