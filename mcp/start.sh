@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Start Ollama server in the background
+# Inicia o servidor Ollama em segundo plano
+echo "🚀 Iniciando Ollama..."
 ollama serve &
 
-# Wait for Ollama to start
-sleep 5
+# Aguarda Ollama estar pronto
+echo "⏳ Aguardando Ollama iniciar..."
+until curl -s http://localhost:11434 > /dev/null; do
+    sleep 2
+done
 
-# Pull the model if it's not already present
+# Faz o pull do modelo se ainda não estiver disponível
+echo "⬇️  Fazendo pull do modelo codellama:13b-instruct..."
 ollama pull codellama:13b-instruct
 
-# Keep the container running
+# Container permanece vivo para uso como LLM backend
+echo "✅ Ollama pronto e modelo carregado! Mantendo container ativo..."
 tail -f /dev/null

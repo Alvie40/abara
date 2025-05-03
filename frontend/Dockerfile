@@ -1,26 +1,26 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Increase Node memory limit and disable telemetry
 ENV NODE_OPTIONS="--max-old-space-size=4096" \
-    NEXT_TELEMETRY_DISABLED=1
+    VITE_API_URL=http://localhost:8080/api
 
-# Copy package files
-COPY package.json ./
-
-# Install dependencies
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the rest of the application
 COPY . .
+RUN npm run build
 
-# Update browserslist database and build
-RUN npx update-browserslist-db@latest && \
-    npm run build
+# Production stage
+FROM nginx:alpine
 
-# Expose the port
-EXPOSE 3000
+# Copy NGINX configuration and security headers
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY static.headers /etc/nginx/security.d/headers.conf
 
-# Start the application
-CMD ["npm", "start"]
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,40 +1,29 @@
-FROM python:3.12-slim
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Copy go mod and sum files
+COPY go.mod go.sum ./
 
-# Install Poetry
-RUN pip install poetry
+# Download dependencies
+RUN go mod download
 
-# Copy poetry files
-COPY pyproject.toml poetry.lock ./
-
-# Install dependencies
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
-
-# Copy application code
+# Copy source code
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p uploads && chmod 777 uploads
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
 
-# Create and set up entrypoint script
-RUN echo '#!/bin/sh\n\
-while ! pg_isready -h db -U postgres; do\n\
-    echo "Waiting for postgres..."\n\
-    sleep 2\n\
-done\n\
-alembic upgrade head\n\
-uvicorn app.main:app --host 0.0.0.0 --port 8080\n' > /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh
+# Create final lightweight image
+FROM alpine:latest
 
+WORKDIR /app
+
+# Copy the binary from builder
+COPY --from=builder /app/main .
+
+# Expose port
 EXPOSE 8080
 
-CMD ["/app/entrypoint.sh"]
+# Run the application
+CMD ["./main"]

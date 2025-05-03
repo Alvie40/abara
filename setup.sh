@@ -23,8 +23,9 @@ if ! podman machine list | grep -q "currently running"; then
     podman machine start
 fi
 
-# Create database migrations directory if it doesn't exist
+# Create necessary directories
 mkdir -p backend/migrations
+mkdir -p backend/uploads
 
 # Create initial migration file
 cat > backend/migrations/init.sql << EOL
@@ -74,7 +75,20 @@ VALUES ('Admin', 'admin@example.com', '\$2a\$10\$zXvx5h.C/E8JPd3ZyRQWpOfGHKPvyE0
 ON CONFLICT (email) DO NOTHING;
 EOL
 
+# Generate go.sum
+cd backend
+go mod download
+go mod tidy
+cd ..
+
+# Build and start containers
+podman compose build
+podman compose up -d
+
 echo "Setup complete! You can now run 'podman-compose up' to start the application."
 echo "The admin user credentials are:"
 echo "Email: admin@example.com"
 echo "Password: admin123"
+
+echo "🚀 Project is running!"
+echo "Backend API: http://localhost:8080"
