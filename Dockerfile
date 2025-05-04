@@ -1,7 +1,7 @@
 FROM golang:1.17-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN go build -o backend ./cmd/backend
+RUN go build -o backend ./cmd/main.go
 
 FROM alpine:3.14
 WORKDIR /app
