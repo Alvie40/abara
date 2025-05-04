@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
@@ -11,11 +11,13 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
+# Build the application with platform-specific flags
+ARG TARGETOS
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o main ./cmd/main.go
 
 # Create final lightweight image
-FROM alpine:latest
+FROM --platform=$TARGETPLATFORM alpine:latest
 
 WORKDIR /app
 

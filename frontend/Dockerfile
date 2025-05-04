@@ -5,7 +5,7 @@ WORKDIR /app
 ENV NODE_OPTIONS="--max-old-space-size=4096" \
     VITE_API_URL=http://localhost:8080/api
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN npm install
 
 COPY . .
