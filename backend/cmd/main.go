@@ -7,7 +7,6 @@ import (
 	"abara/backend/config"
 	"abara/backend/internal/handlers"
 	"abara/backend/internal/services"
-	"abara/backend/internal/utils/db"
 	"abara/backend/router"
 
 	"github.com/gin-gonic/gin"
