@@ -7,6 +7,7 @@ import (
 	"abara/backend/config"
 	"abara/backend/internal/handlers"
 	"abara/backend/internal/services"
+	"abara/backend/internal/utils/db"
 	"abara/backend/router"
 
 	"github.com/gin-gonic/gin"
@@ -19,12 +20,13 @@ func main() {
 	cfg := config.Load()
 
 	// Initialize database connection
-	if err := db.DatabaseConnection(); err != nil {
+	db, err := db.DatabaseConnection()
+	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
 	// Initialize services
-	bookService := services.NewBookService(db.DB)
+	bookService := services.NewBookService(db)
 
 	// Initialize handlers
 	bookHandler := handlers.NewBookHandler(bookService)
