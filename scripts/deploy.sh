@@ -14,6 +14,7 @@ rsync -avz --delete -e ssh . "$OMEN_HOST:$OMEN_PATH" \
 
 echo "🔄 Reiniciando containers no Omen..."
 ssh "$OMEN_HOST" << EOF
+sudo systemctl start docker
 cd $OMEN_PATH
 docker compose down
 docker compose up --build -d

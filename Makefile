@@ -45,3 +45,6 @@ clean:  ## Remove containers, volumes e rede
 	@docker container prune -f
 	@docker volume rm $(docker volume ls -qf dangling=true) || true
 	@docker network rm $(docker network ls -qf dangling=true) || true
+
+omen:  ## Acessa o Omen, entra no projeto e sobe o Docker
+	ssh alvaro@192.168.86.76 'cd ~/apps/5pso && sudo systemctl start docker && bash'
