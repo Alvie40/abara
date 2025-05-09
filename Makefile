@@ -22,12 +22,14 @@ db:  ## Acessa o banco de dados no Omen
 
 git:  ## Salva alterações no Git e envia para o GitHub
 	@read -p "📝 Mensagem do commit: " msg; \
-	git add . && git commit -m "$$msg" && git push
+	git add . && git commit -m "$$msg" || true; \
+	git push -u origin HEAD
 
 deploy:  ## Commita e faz deploy para o Omen
 	@echo "💾 Salvando alterações no Git antes do deploy..."
 	@read -p "📝 Mensagem do commit: " msg; \
-	git add . && git commit -m "$$msg" && git push
+	git add . && git commit -m "$$msg" || true; \
+	git push -u origin HEAD
 	./scripts/deploy.sh
 
 status:  ## Mostra o status dos containers local
