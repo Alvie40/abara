@@ -31,7 +31,12 @@ mkdir -p "$OMEN_PATH"
 tar -xzf /tmp/$TAR_NAME -C "$OMEN_PATH"
 rm /tmp/$TAR_NAME
 cd "$OMEN_PATH"
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
+# Exporta apenas se for Apple Silicon
+ARCH=\$(uname -m)
+if [ "\$ARCH" = "arm64" ] || [ "\$ARCH" = "aarch64" ]; then
+  export DOCKER_DEFAULT_PLATFORM=linux/amd64
+fi
+
 sudo systemctl start docker
 docker compose down
 docker compose build --no-cache
