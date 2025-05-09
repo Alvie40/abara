@@ -71,3 +71,9 @@ func (ob *OrderBook) TableName() string {
 func (o *Order) TableName() string {
 	return "orders"
 }
+
+type Message struct {
+	ID      int    `json:"id"`
+	Sender  string `json:"sender"`
+	Content string `json:"content"`
+}

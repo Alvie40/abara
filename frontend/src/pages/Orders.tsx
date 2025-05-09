@@ -1,4 +1,5 @@
 import { useGetUserOrdersQuery } from '../store/api/ordersApi'
+import { Order } from '../types'
 
 const Orders = () => {
   const { data: orders = [], isLoading, error } = useGetUserOrdersQuery()
@@ -17,7 +18,7 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Your Orders</h2>
-      {orders.map((order) => (
+      {orders.map((order: Order) => (
         <div key={order.id} className="bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-start">
             <div>

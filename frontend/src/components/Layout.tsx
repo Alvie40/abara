@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 
 const Layout = () => {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
   const cart = useSelector((state: RootState) => state.cart)
 
   return (

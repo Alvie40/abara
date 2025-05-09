@@ -15,10 +15,10 @@ import (
 )
 
 type BookHandler struct {
-	bookService services.BookService
+	bookService *services.BookService
 }
 
-func NewBookHandler(bookService services.BookService) *BookHandler {
+func NewBookHandler(bookService *services.BookService) *BookHandler {
 	return &BookHandler{bookService: bookService}
 }
 

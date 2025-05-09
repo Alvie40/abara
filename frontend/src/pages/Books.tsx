@@ -2,6 +2,7 @@ import { useGetBooksQuery } from '../store/api/booksApi'
 import { useDispatch } from 'react-redux'
 import { addToCart } from '../store/reducers/cartSlice'
 import Swal from 'sweetalert2'
+import { Book } from '../types'
 
 const Books = () => {
   const { data: books = [], isLoading, error } = useGetBooksQuery()
@@ -32,7 +33,7 @@ const Books = () => {
         <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">Available Books</h2>
 
         <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-          {books.map((book) => (
+          {books.map((book: Book) => (
             <div key={book.id} className="group relative">
               <div className="w-full min-h-80 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none">
                 <img

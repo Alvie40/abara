@@ -1,0 +1,38 @@
+# Pastas pesadas
+node_modules
+dist
+build
+coverage
+.next
+.vite
+.vscode
+
+# Git e outros arquivos ocultos
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Configs locais e sensíveis
+.env
+.env.*
+*.local
+*.env
+
+# Logs e temporários
+*.log
+*.tsbuildinfo
+*.swp
+*.DS_Store
+*.bak
+
+# Arquivos de lock (se não forem usados no build diretamente)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Arquivos de testes e storybook
+*.spec.*
+*.test.*
+.storybook

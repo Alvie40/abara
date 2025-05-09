@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHtmlPlugin } from 'vite-plugin-html';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,7 +30,10 @@ export default defineConfig({
           }
         }
       }
-    })
+    }),
+    nodePolyfills({
+      protocolImports: true,
+    }),
   ],
   server: {
     port: 3000,

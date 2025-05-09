@@ -1,25 +1,10 @@
-FROM ollama/ollama:latest
+FROM python:3.11-slim
 
-# Instala Python, pip e curl
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# Instala aider
-RUN pip3 install aider-chat
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Define diretório de trabalho
-WORKDIR /workspace
+COPY app.py .
 
-# Copia código do MCP e script de inicialização
-COPY . .
-COPY start.sh .
-RUN chmod +x start.sh
-
-# Exponha a porta padrão do Ollama
-EXPOSE 11434
-
-# Roda o script de inicialização
-CMD ["./start.sh"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

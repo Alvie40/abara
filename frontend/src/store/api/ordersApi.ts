@@ -33,3 +33,8 @@ export const ordersApi = createApi({
     })
   })
 })
+
+export const {
+  useGetUserOrdersQuery,
+  useAddOrderMutation
+} = ordersApi
