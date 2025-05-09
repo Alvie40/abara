@@ -4,45 +4,55 @@ set -e
 OMEN_HOST="alvaro@192.168.86.76"
 OMEN_PATH="/home/alvaro/apps/5pso"
 SSH_OPTS="-o ConnectTimeout=15 -o ConnectionAttempts=3"
-TAR_NAME="deploy_$(date +%s).tar.gz"
+ARCHIVE="deploy_$(date +%s).tar.gz"
 
-echo "📦 Criando pacote local: $TAR_NAME"
-tar --exclude='.git' \
-    --exclude='.env.local' \
+echo "📦 Criando pacote local: $ARCHIVE"
+tar --exclude-vcs \
     --exclude='node_modules' \
-    --exclude='static' \
     --exclude='frontend/dist' \
+    --exclude='static' \
     --exclude='*.DS_Store' \
     --exclude='.aider*' \
     --exclude='frontend-next/' \
     --exclude='path/' \
     --exclude='screenshots/' \
     --exclude='*.log' \
-    --exclude="$TAR_NAME" \
-    -czf "$TAR_NAME" .
+    -czf "$ARCHIVE" .
 
 echo "📤 Enviando para o Omen via SCP..."
-scp "$TAR_NAME" "$OMEN_HOST:/tmp/$TAR_NAME"
+scp "$ARCHIVE" "$OMEN_HOST:/tmp/"
 
 echo "📂 Extraindo no Omen e reiniciando containers..."
-ssh $SSH_OPTS "$OMEN_HOST" << EOF
+ssh $SSH_OPTS "$OMEN_HOST" bash << EOF
 set -e
+
 mkdir -p "$OMEN_PATH"
-tar -xzf /tmp/$TAR_NAME -C "$OMEN_PATH"
-rm /tmp/$TAR_NAME
+tar -xzf /tmp/$ARCHIVE -C "$OMEN_PATH"
+rm /tmp/$ARCHIVE
 cd "$OMEN_PATH"
-# Exporta apenas se for Apple Silicon
-ARCH=\$(uname -m)
-if [ "\$ARCH" = "arm64" ] || [ "\$ARCH" = "aarch64" ]; then
-  export DOCKER_DEFAULT_PLATFORM=linux/amd64
+
+# ⚙️ Verifica se Ollama está instalado
+if ! command -v ollama >/dev/null 2>&1; then
+  echo "⚙️ Instalando Ollama..."
+  curl -fsSL https://ollama.com/install.sh | sh
+  sudo systemctl enable --now ollama
+else
+  echo "✅ Ollama já instalado"
 fi
 
+# 🔍 Verifica se o modelo já está disponível
+if ! ollama list | grep -q 'llama3:8b'; then
+  echo "⬇️ Baixando modelo llama3:8b..."
+  ollama pull llama3:8b
+else
+  echo "✅ Modelo llama3:8b já está disponível"
+fi
+
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
 sudo systemctl start docker
 docker compose down
 docker compose build --no-cache
 docker compose up -d
-docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 EOF
 
 echo "✅ Deploy finalizado com sucesso!"
-rm "$TAR_NAME"
