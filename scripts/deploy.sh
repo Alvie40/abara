@@ -3,30 +3,36 @@ set -e
 
 OMEN_HOST="alvaro@192.168.86.76"
 OMEN_PATH="/home/alvaro/apps/5pso"
-SSH_OPTS="-tt -o ConnectTimeout=15 -o ConnectionAttempts=3"
+ARCHIVE_NAME="deploy_$(date +%s).tar.gz"
+EXCLUDES=(
+  --exclude='.git'
+  --exclude='.env.local'
+  --exclude='node_modules'
+  --exclude='static'
+  --exclude='frontend/dist'
+  --exclude='*.DS_Store'
+  --exclude='.aider*'
+  --exclude='frontend-next/'
+  --exclude='path/'
+  --exclude='Here is the updated Dockerfile'
+  --exclude='screenshots/'
+  --exclude='*.log'
+)
 
-echo "📦 Enviando código para o Omen via rsync..."
-rsync -avz --delete \
-  --rsync-path="bash -c 'rsync'" \
-  -e "ssh $SSH_OPTS" \
-  . "$OMEN_HOST:$OMEN_PATH" \
-  --exclude '.git' \
-  --exclude '.env.local' \
-  --exclude 'node_modules' \
-  --exclude 'static' \
-  --exclude 'frontend/dist' \
-  --exclude '*.DS_Store' \
-  --exclude '.aider*' \
-  --exclude 'frontend-next/' \
-  --exclude 'path/' \
-  --exclude 'Here is the updated Dockerfile' \
-  --exclude 'screenshots/' \
-  --exclude '*.log'
+echo "📦 Criando pacote local: $ARCHIVE_NAME"
+tar czf "/tmp/$ARCHIVE_NAME" "${EXCLUDES[@]}" .
 
-echo "🔄 Reiniciando containers no Omen..."
-ssh $SSH_OPTS "$OMEN_HOST" << EOF
+echo "📤 Enviando para o Omen via SCP..."
+scp "/tmp/$ARCHIVE_NAME" "$OMEN_HOST:/tmp/$ARCHIVE_NAME"
+
+echo "📂 Extraindo no Omen e reiniciando containers..."
+ssh "$OMEN_HOST" << EOF
 sudo systemctl start docker
-cd $OMEN_PATH
+rm -rf "$OMEN_PATH"
+mkdir -p "$OMEN_PATH"
+tar xzf "/tmp/$ARCHIVE_NAME" -C "$OMEN_PATH"
+rm "/tmp/$ARCHIVE_NAME"
+cd "$OMEN_PATH"
 docker compose down
 docker compose up --build -d
 EOF
